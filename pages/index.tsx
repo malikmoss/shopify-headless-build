@@ -1,4 +1,6 @@
 import Head from 'next/head'
+import { storefront } from '../utils/index'
+import { json } from 'stream/consumers'
 
 const staticProducts = [
   {
@@ -35,7 +37,8 @@ const staticProducts = [
   },
 ]
 
-export default function Home() {
+export default function Homepage({  products  } :any) {
+  console.log(products)
   return (
   
     <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
@@ -88,3 +91,39 @@ export default function Home() {
    </main>
   )
 }
+
+export async function getStaticProps() {
+  const { data } = await storefront(productsQuery)
+  const { products } = data
+    return {
+      props: {
+        products
+    }
+  }
+}
+
+const gql = String.raw
+
+const productsQuery = gql`
+query Products {
+  products(first:6) {
+    edges {
+      node {
+        title
+        priceRange {
+          minVariantPrice {
+            amount
+          }
+        }
+        images(first: 1) {
+          edges {
+            node {
+              transformedSrc
+              altText
+            }
+          }
+        }
+      }
+    }
+  }
+}`
